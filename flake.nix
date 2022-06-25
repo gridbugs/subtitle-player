@@ -1,5 +1,5 @@
 {
-  description = "MSPaint95";
+  description = "Subtitle Player";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
@@ -21,7 +21,7 @@
       {
         devShell = mkShell rec {
           buildInputs = [
-            nodejs-18_x
+            nodejs-16_x
             nodePackages.typescript-language-server
           ];
         };
