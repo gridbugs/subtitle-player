@@ -44,6 +44,49 @@ export function parseSrtPeriod(srtPeriod: string): SubtitlePeriod {
   return { start, end };
 }
 
+function parseSrtSubtitleText(subtitleTextString: string): SubtitleText {
+  // an example subtitle text string is:
+  // - Here's your <i>pen</i> back.
+  // - <i>[Brett] What do we do now?</i>
+
+  // in the example, tokens would be:
+  // [ " - Here's your ", "<i>", "pen", "</i> back.\n - ", "<i>", [Brett] What do we do now?", "</i>" ]
+  const tokens = subtitleTextString.split(/(<\/?i>)/);
+
+  function isItalicOpen(s: string): boolean {
+    return s === '<i>';
+  }
+
+  function isItalicClose(s: string): boolean {
+    return s === '</i>';
+  }
+
+  const parts = [];
+  let i = 0;
+  while (i < tokens.length) {
+    if (isItalicOpen(tokens[i])) {
+      if (i + 1 === tokens.length) {
+        throw new Error(`invalid subtitle: ${subtitleTextString}`);
+      } else if (isItalicClose(tokens[i + 1])) {
+        // empty italic block, just ignore the entire block
+        i += 2;
+      } else {
+        const str = tokens[i + 1];
+        if (i + 2 === tokens.length || !isItalicClose(tokens[i + 2])) {
+          throw new Error(`invalid subtitle: ${subtitleTextString}`);
+        }
+        i += 3;
+        parts.push({ str, italic: true });
+      }
+    } else {
+      parts.push({ str: tokens[i], italic: false });
+      i += 1;
+    }
+  }
+
+  return { parts };
+}
+
 export function parseSrtSubtitle(srtSubtitle: string): Subtitle {
   // an example srt subtitle is:
   // 956
@@ -56,15 +99,11 @@ export function parseSrtSubtitle(srtSubtitle: string): Subtitle {
   }
   const index = parseInt(partsStr[0]);
   const period = parseSrtPeriod(partsStr[1]);
-  const str = partsStr.slice(2).join('\n');
+  const text = parseSrtSubtitleText(partsStr.slice(2).join('\n'));
   return {
     index,
     period,
-    text: {
-      parts: [
-        { str, italic: false },
-      ],
-    },
+    text,
   };
 }
 
@@ -76,10 +115,16 @@ export function prettyPrintSubtitlePeriod({ start, end }: SubtitlePeriod): strin
   return `${timestamp.prettyPrint(start)} --> ${timestamp.prettyPrint(end)}`;
 }
 
-export function prettyPrintSubtitleText({ parts }: SubtitleText): string {
-  return parts.map(p => p.str).join('');
+export function htmlPrintSubtitleText({ parts }: SubtitleText): string {
+  return parts.map((part) => {
+    if (part.italic) {
+      return `<em>${part.str}</em>`;
+    } else {
+      return part.str;
+    }
+  }).join('');
 }
 
 export function prettyPrintSubtitle({ index, period, text }: Subtitle): string {
-  return `${index}\n${prettyPrintSubtitlePeriod(period)}\n${prettyPrintSubtitleText(text)}`;
+  return `${index}\n${prettyPrintSubtitlePeriod(period)}\n${htmlPrintSubtitleText(text)}`;
 }
