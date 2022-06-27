@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon index.ts",
-    "serve": "ts-node index.ts"
+    "dev-client": "tsc src/client/index.ts --outFile ./dist/index.js --module amd --watch",
+    "build-client": "tsc src/client/index.ts --outFile ./dist/index.js --module amd",
+    "dev-server": "nodemon src/server/index.ts",
+    "serve": "npm run build-client && ts-node src/server/index.ts"
   },
   "repository": {
     "type": "git",

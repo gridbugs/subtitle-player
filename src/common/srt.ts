@@ -51,7 +51,7 @@ function parseSrtSubtitleText(subtitleTextString: string): SubtitleText {
 
   // in the example, tokens would be:
   // [ " - Here's your ", "<i>", "pen", "</i> back.\n - ", "<i>", [Brett] What do we do now?", "</i>" ]
-  const tokens = subtitleTextString.split(/(<\/?i>)/);
+  const tokens = subtitleTextString.split(/(<\/?i>)/).filter(s => s.length > 0);
 
   function isItalicOpen(s: string): boolean {
     return s === '<i>';
