@@ -37,10 +37,6 @@ function readSubtitlesSync(subtitlesPath: string): string {
   return fileContentsBuffer.toString();
 }
 
-function base64Encode(s: string): string {
-  return Buffer.from(s, 'binary').toString('base64');
-}
-
 type Handler = (req: express.Request<{}, {}, {}, Record<string, string>>, res: express.Response) => void;
 
 function getWatchHandler(subtitles: srt.Subtitle[]): Handler {
@@ -48,14 +44,8 @@ function getWatchHandler(subtitles: srt.Subtitle[]): Handler {
     res.send(`<!DOCTYPE html>
 <html>
   <body>
-    <script src='/require.js'></script>
-    <script src='/index.js'></script>
-    <script>
-      const subtitlesJsonStringBase64 = '${base64Encode(JSON.stringify(subtitles))}';
-      const subtitlesJsonString = atob(subtitlesJsonStringBase64);
-      const subtitles = JSON.parse(subtitlesJsonString);
-      requirejs(['client/index'], c => c.runWatch(subtitles));
-    </script>
+    <div hidden=true id="subtitles-json">${JSON.stringify(subtitles)}</div>
+    <script src='/watch.js'></script>
   </body>
 </html>`);
   };
