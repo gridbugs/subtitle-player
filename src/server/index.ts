@@ -136,8 +136,7 @@ class AppState {
 function run(): void {
   const { subtitlesPath, port } = parseArgs();
   const srtString = readSubtitlesSync(subtitlesPath);
-  const srtStringCleaned = srtString.replace(/[^\x00-\x7F]/g, '');
-  const subtitles = srt.parseSrtString(srtStringCleaned);
+  const subtitles = srt.parseSrtString(srtString);
   const app = express();
   const server = http.createServer(app);
   const io = new socketIo.Server(server);
