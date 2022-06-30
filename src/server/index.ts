@@ -1,7 +1,10 @@
 import express from 'express';
 import fs from 'fs';
 import yargs from 'yargs';
+import * as socketIo from 'socket.io';
+import * as http from 'http';
 import * as srt from '../common/srt';
+import * as timestamp from '../common/timestamp';
 
 const DEFAULT_PORT = 3000;
 
@@ -45,10 +48,23 @@ function getWatchHandler(subtitles: srt.Subtitle[]): Handler {
 <html>
   <body>
     <div hidden=true id="subtitles-json">${JSON.stringify(subtitles)}</div>
+    <div id="subtitles-display"></div>
     <script src='/watch.js'></script>
   </body>
 </html>`);
   };
+}
+
+class AppState {
+  currentTimeMs: number;
+
+  constructor() {
+    this.currentTimeMs = 1000000;
+  }
+
+  tick(deltaMs: number) {
+    this.currentTimeMs += deltaMs;
+  }
 }
 
 function run(): void {
@@ -57,10 +73,28 @@ function run(): void {
   const srtStringCleaned = srtString.replace(/[^\x00-\x7F]/g, "");
   const subtitles = srt.parseSrtString(srtStringCleaned);
   const app = express();
+  const server = http.createServer(app);
+  const io = new socketIo.Server(server);
+  const state = new AppState();
   app.route('/watch').get(getWatchHandler(subtitles));
   app.use(express.static('dist'));
-  app.use(express.static('third-party'));
-  app.listen(port, () => console.log(`server running on port ${port}`));
+  io.on('connection', (_socket) => {
+    console.log('a user connected');
+  });
+  server.listen(port, () => console.log(`server running on port ${port}`));
+
+  const periodMs = 100;
+  let previousTickTimeMs = Date.now();
+  function tick() {
+    const currentTickTimeMs = Date.now();
+    const deltaMs = currentTickTimeMs - previousTickTimeMs;
+    state.tick(deltaMs);
+    io.emit('SetTime', state.currentTimeMs);
+    previousTickTimeMs = currentTickTimeMs;
+    setTimeout(tick, periodMs);
+  }
+
+  tick();
 }
 
 run();

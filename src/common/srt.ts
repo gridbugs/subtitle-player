@@ -20,6 +20,27 @@ export type Subtitle = {
   text: SubtitleText,
 };
 
+/** Looks up the subtitle whose period includes the given timestamp, assuming that
+ *  subtitles is sorted cronologically by start time and contains no overlapping
+ *  periods
+ */
+export function findSubtitleAtTime(subtitles: Subtitle[], time: timestamp.Timestamp): Subtitle | null {
+  let lo = 0;
+  let hi = subtitles.length;
+  while (lo < hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    const subtitle = subtitles[mid];
+    if (subtitle.period.start.totalMillis > time.totalMillis) {
+      hi = mid;
+    } else if (subtitle.period.end.totalMillis <= time.totalMillis) {
+      lo = mid + 1;
+    } else {
+      return subtitle;
+    }
+  }
+  return null;
+}
+
 export function parseSrtTimestamp(srtTimestamp: string): timestamp.Timestamp {
   // an example srt timestamp is 01:52:45,517
   const partsStr = srtTimestamp.split(/[:,]/);
@@ -122,7 +143,7 @@ export function htmlPrintSubtitleText({ parts }: SubtitleText): string {
     } else {
       return part.str;
     }
-  }).join('');
+  }).join('<br/>');
 }
 
 export function prettyPrintSubtitle({ index, period, text }: Subtitle): string {
