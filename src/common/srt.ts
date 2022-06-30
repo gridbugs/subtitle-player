@@ -143,7 +143,7 @@ export function htmlPrintSubtitleText({ parts }: SubtitleText): string {
     } else {
       return part.str;
     }
-  }).join('<br/>');
+  }).join('').replace('\n', '<br/>');
 }
 
 export function prettyPrintSubtitle({ index, period, text }: Subtitle): string {
