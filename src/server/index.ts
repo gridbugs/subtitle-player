@@ -60,16 +60,51 @@ function getControlHandler(subtitles: srt.Subtitle[]): Handler {
 <html>
   <head>
     <style>
-      #subtitles-display {
-        height: 8em;
+      * {
+        padding: 0;
+        margin: 0;
       }
-    </style>
+      #play, #pause {
+        width: 30%;
+        height: 4em;
+      }
+      #subtitles-display {
+        position: absolute;
+        top: 5em;
+        height: 6em;
+      }
+      #subtitles-seek {
+        position: fixed;
+        top: 12em;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        overflow: scroll;
+      }
+      #subtitles-seek div.subtitle {
+        position: absolute;
+        background-color: rgb(127, 187, 187);
+      }
+      #subtitles-seek div.time-marker {
+        position: absolute;
+        border-top: 1px solid black;
+        width: 100%;
+        text-align: center;
+        z-index: -1;
+      }
+      #subtitles-seek div#cursor {
+        position: absolute;
+        border-top: 4px solid red;
+        width: 100%;
+      }
+   </style>
   </head>
   <body>
     <div hidden=true id='subtitles-json'>${JSON.stringify(subtitles)}</div>
     <input type='button' value='Play' id='play'/>
     <input type='button' value='Pause' id='pause'/>
     <div id='subtitles-display'></div>
+    <div id='subtitles-seek'></div>
     <script src='/control.js'></script>
   </body>
 </html>`);

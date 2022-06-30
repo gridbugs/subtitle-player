@@ -20,6 +20,10 @@ export type Subtitle = {
   text: SubtitleText,
 };
 
+export function periodLengthMs(period: SubtitlePeriod): number {
+  return period.end.totalMillis - period.start.totalMillis;
+}
+
 /** Looks up the subtitle whose period includes the given timestamp, assuming that
  *  subtitles is sorted cronologically by start time and contains no overlapping
  *  periods
