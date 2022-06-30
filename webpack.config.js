@@ -4,6 +4,7 @@ module.exports = {
   mode: 'development',
   entry: {
     watch: './src/client/watch.ts',
+    control: './src/client/control.ts',
   },
   devtool: 'inline-source-map',
   module: {

@@ -6,6 +6,7 @@
         "strict": true,
         "esModuleInterop": true,
         "target": "es6",
+        "strictNullChecks": true,
     },
     "exclude": [
         "node_modules"

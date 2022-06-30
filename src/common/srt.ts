@@ -116,7 +116,7 @@ export function parseSrtSubtitle(srtSubtitle: string): Subtitle {
   // - <i>[Steady Beep]</i>
   const partsStr = srtSubtitle.split(/\r?\n/);
   if (partsStr.length < 2) {
-    throw new Error(`unexpected subtitle: ${srtSubtitle}`);
+    throw new Error(`unexpected subtitle: "${srtSubtitle}"`);
   }
   const index = parseInt(partsStr[0]);
   const period = parseSrtPeriod(partsStr[1]);
@@ -129,7 +129,8 @@ export function parseSrtSubtitle(srtSubtitle: string): Subtitle {
 }
 
 export function parseSrtString(srtString: string): Subtitle[] {
-  return srtString.split(/\r?\n\r?\n/).map(parseSrtSubtitle);
+  const srtStringStripped = srtString.replace(/\r?\n$/g, '');
+  return srtStringStripped.split(/\r?\n\r?\n/).map(parseSrtSubtitle);
 }
 
 export function prettyPrintSubtitlePeriod({ start, end }: SubtitlePeriod): string {
