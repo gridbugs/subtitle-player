@@ -16,6 +16,7 @@ function subtitleTextToShowAtTime(subtitles: srt.Subtitle[], ts: timestamp.Times
 
 
 const MS_TO_PX_MULT = 0.02;
+const MARKER_PERIOD_MS = timestamp.fromParts({ hours: 0, minutes: 0, seconds: 10, millis: 0 }).totalMillis;
 
 function subtitleToHtml(subtitle: srt.Subtitle): string {
   const periodMs = srt.periodLengthMs(subtitle.period);
@@ -29,18 +30,18 @@ function subtitleToHtml(subtitle: srt.Subtitle): string {
 
 function mkTimeMarker(timeMs: number): string {
   const topPx = Math.floor(timeMs * MS_TO_PX_MULT);
+  const heightPx = Math.floor(MARKER_PERIOD_MS * MS_TO_PX_MULT);
   const timeMarkerText = timestamp.prettyPrint(timestamp.fromMillis(timeMs));
-  return `<div class='time-marker' style='top: ${topPx}px'>
+  return `<div class='time-marker' style='top: ${topPx}px; height: ${heightPx}px;' data-time-ms='${timeMs}'>
   ${timeMarkerText}
 </div>`;
 }
 
 function mkTimeMarkersHtml(endTime: timestamp.Timestamp): string {
-  const period = timestamp.fromParts({ hours: 0, minutes: 0, seconds: 10, millis: 0 }).totalMillis;
   const endMs = endTime.totalMillis;
   const timesMs: number[] = [0];
   while (timesMs[timesMs.length - 1] < endMs) {
-    timesMs.push(timesMs[timesMs.length - 1] + period);
+    timesMs.push(timesMs[timesMs.length - 1] + MARKER_PERIOD_MS);
   }
   return timesMs.map(mkTimeMarker).join('\n');
 }
@@ -59,8 +60,21 @@ function run() {
   const subtitles = page.getSubtitles();
   const subtitlesHtml = subtitles.map(subtitleToHtml).join('\n');
   const timeMarkersHtml = mkTimeMarkersHtml(subtitles[subtitles.length - 1].period.end);
-  console.log(timeMarkersHtml);
   page.getElement('subtitles-seek').innerHTML = subtitlesHtml + timeMarkersHtml + mkCursor();
+  document.querySelectorAll('.time-marker').forEach((element) => {
+    if (element instanceof HTMLElement) {
+      const timeMsString = element.getAttribute('data-time-ms');
+      if (timeMsString !== null) {
+        const timeMs = parseInt(timeMsString);
+        element.onclick = (e: MouseEvent) => {
+          const yWithinMarkerPx = e.offsetY;
+          const timeMsWithinMarker = yWithinMarkerPx / MS_TO_PX_MULT;
+          const clickTimeMs = timeMs + timeMsWithinMarker;
+          io.emit('Seek', clickTimeMs);
+        }
+      }
+    }
+  });
   const io = socketIoClient.io();
   io.on('SetTime', (timeMs) => {
     const ts = timestamp.fromMillis(timeMs);
@@ -72,6 +86,9 @@ function run() {
   };
   page.getElement('pause').onclick = () => {
     io.emit('Pause');
+  };
+  page.getElement('scroll-to-cursor').onclick = () => {
+    page.getElement('cursor').scrollIntoView();
   };
 }
 

@@ -4,6 +4,7 @@ import yargs from 'yargs';
 import * as socketIo from 'socket.io';
 import * as http from 'http';
 import * as srt from '../common/srt';
+import * as timestamp from '../common/timestamp';
 
 const DEFAULT_PORT = 3000;
 
@@ -45,6 +46,14 @@ function getWatchHandler(subtitles: srt.Subtitle[]): Handler {
   return (_req, res) => {
     res.send(`<!DOCTYPE html>
 <html>
+  <head>
+    <style>
+      #subtitles-display {
+        font-size: 36pt;
+        text-align: center;
+      }
+    </style>
+  </head>
   <body>
     <div hidden=true id='subtitles-json'>${JSON.stringify(subtitles)}</div>
     <div id='subtitles-display'></div>
@@ -64,7 +73,7 @@ function getControlHandler(subtitles: srt.Subtitle[]): Handler {
         padding: 0;
         margin: 0;
       }
-      #play, #pause {
+      #play, #pause, #scroll-to-cursor {
         width: 30%;
         height: 4em;
       }
@@ -84,13 +93,14 @@ function getControlHandler(subtitles: srt.Subtitle[]): Handler {
       #subtitles-seek div.subtitle {
         position: absolute;
         background-color: rgb(127, 187, 187);
+        padding-left: 0.5em;
+        padding-right: 0.5em;
       }
       #subtitles-seek div.time-marker {
         position: absolute;
         border-top: 1px solid black;
         width: 100%;
         text-align: center;
-        z-index: -1;
       }
       #subtitles-seek div#cursor {
         position: absolute;
@@ -103,6 +113,7 @@ function getControlHandler(subtitles: srt.Subtitle[]): Handler {
     <div hidden=true id='subtitles-json'>${JSON.stringify(subtitles)}</div>
     <input type='button' value='Play' id='play'/>
     <input type='button' value='Pause' id='pause'/>
+    <input type='button' value='Scroll to Cursor' id='scroll-to-cursor'/>
     <div id='subtitles-display'></div>
     <div id='subtitles-seek'></div>
     <script src='/control.js'></script>
@@ -132,7 +143,7 @@ class AppState {
   private previousTickTimeMs: number | null;
 
   constructor() {
-    this.currentTimeMs = 1000000;
+    this.currentTimeMs = 0;
     this.playing = false;
     this.previousTickTimeMs = null;
   }
@@ -166,6 +177,10 @@ class AppState {
   play(): void {
     this.playing = true;
   }
+
+  seekMs(timeMs: number): void {
+    this.currentTimeMs = timeMs;
+  }
 }
 
 function run(): void {
@@ -189,6 +204,10 @@ function run(): void {
     socket.on('Pause', () => {
       console.log('pause');
       state.pause();
+    });
+    socket.on('Seek', (timeMs) => {
+      console.log('seek', timestamp.prettyPrint(timestamp.fromMillis(timeMs)));
+      state.seekMs(timeMs);
     });
   });
   server.listen(port, () => console.log(`server running on port ${port}`));
