@@ -85,19 +85,20 @@ function getControlHandler(subtitles: srt.Subtitle[]): Handler {
       * {
         padding: 0;
         margin: 0;
+        font-size: 24pt;
       }
-      #play, #pause, #scroll-to-cursor {
-        width: 30%;
-        height: 4em;
+      .button {
+        width: 20%;
+        height: 2em;
       }
       #subtitles-display {
         position: absolute;
         top: 5em;
-        height: 6em;
+        height: 4em;
       }
       #subtitles-seek {
         position: fixed;
-        top: 12em;
+        top: 10em;
         bottom: 0;
         left: 0;
         right: 0;
@@ -124,9 +125,14 @@ function getControlHandler(subtitles: srt.Subtitle[]): Handler {
   </head>
   <body>
     <div hidden=true id='subtitles-json'>${JSON.stringify(subtitles)}</div>
-    <input type='button' value='Play' id='play'/>
-    <input type='button' value='Pause' id='pause'/>
-    <input type='button' value='Scroll to Cursor' id='scroll-to-cursor'/>
+    <input class='button' type='button' value='Play' id='play'/>
+    <input class='button' type='button' value='Pause' id='pause'/>
+    <input class='button' type='button' value='Cursor' id='scroll-to-cursor'/>
+    <br/>
+    <input class='button' type='button' value='-1s' id='-1s'/>
+    <input class='button' type='button' value='-0.1s' id='-0.1s'/>
+    <input class='button' type='button' value='+0.1s' id='+0.1s'/>
+    <input class='button' type='button' value='+1s' id='+1s'/>
     <div id='subtitles-display'></div>
     <div id='subtitles-seek'></div>
     <script src='/control.js'></script>

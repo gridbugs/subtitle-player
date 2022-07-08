@@ -15,7 +15,7 @@ function subtitleTextToShowAtTime(subtitles: srt.Subtitle[], ts: timestamp.Times
 }
 
 
-const MS_TO_PX_MULT = 0.02;
+const MS_TO_PX_MULT = 0.05;
 const MARKER_PERIOD_MS = timestamp.fromParts({ hours: 0, minutes: 0, seconds: 10, millis: 0 }).totalMillis;
 
 function subtitleToHtml(subtitle: srt.Subtitle): string {
@@ -75,8 +75,10 @@ function run() {
       }
     }
   });
+  let currentTimeMs = 0;
   const io = socketIoClient.io();
   io.on('SetTime', (timeMs) => {
+    currentTimeMs = timeMs;
     const ts = timestamp.fromMillis(timeMs);
     displayElement.innerHTML = subtitleTextToShowAtTime(subtitles, ts);
     setCursorPosition(ts);
@@ -89,6 +91,18 @@ function run() {
   };
   page.getElement('scroll-to-cursor').onclick = () => {
     page.getElement('cursor').scrollIntoView();
+  };
+  page.getElement('+1s').onclick = () => {
+    io.emit('Seek', currentTimeMs + 1000);
+  };
+  page.getElement('-1s').onclick = () => {
+    io.emit('Seek', currentTimeMs - 1000);
+  };
+  page.getElement('+0.1s').onclick = () => {
+    io.emit('Seek', currentTimeMs + 100);
+  };
+  page.getElement('-0.1s').onclick = () => {
+    io.emit('Seek', currentTimeMs - 100);
   };
 }
 
