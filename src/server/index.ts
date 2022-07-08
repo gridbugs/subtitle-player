@@ -51,12 +51,25 @@ function getWatchHandler(subtitles: srt.Subtitle[]): Handler {
       #subtitles-display {
         font-size: 36pt;
         text-align: center;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: #000;
+      }
+      #video {
+        position: fixed;
+        bottom: 0;
       }
     </style>
   </head>
   <body>
     <div hidden=true id='subtitles-json'>${JSON.stringify(subtitles)}</div>
     <div id='subtitles-display'></div>
+    <video id='video' width="320" height="240" autoplay muted loop>
+      <source src="/resources/muted-blank.mp4" type="video/mp4">
+    </video>
     <script src='/watch.js'></script>
   </body>
 </html>`);
