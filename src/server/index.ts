@@ -1,10 +1,10 @@
 import express from 'express';
-import fs from 'fs';
 import yargs from 'yargs';
 import * as socketIo from 'socket.io';
 import * as http from 'http';
 import * as srt from '../common/srt';
 import * as timestamp from '../common/timestamp';
+import readTextFileSync from './text_file';
 
 const DEFAULT_PORT = 3000;
 
@@ -33,11 +33,6 @@ function parseArgs(): Args {
     subtitlesPath: argv['subtitles-path'],
     port: argv['port'],
   };
-}
-
-function readSubtitlesSync(subtitlesPath: string): string {
-  const fileContentsBuffer = fs.readFileSync(subtitlesPath);
-  return fileContentsBuffer.toString();
 }
 
 type Handler = (req: express.Request<{}, {}, {}, Record<string, string>>, res: express.Response) => void;
@@ -204,7 +199,9 @@ class AppState {
 
 function run(): void {
   const { subtitlesPath, port } = parseArgs();
-  const srtString = readSubtitlesSync(subtitlesPath);
+  console.log(`Reading subtitles from text file: ${subtitlesPath}`);
+  const { encoding, content: srtString } = readTextFileSync(subtitlesPath);
+  console.log(`File encoding: ${encoding}`);
   const subtitles = srt.parseSrtString(srtString);
   const app = express();
   const server = http.createServer(app);
