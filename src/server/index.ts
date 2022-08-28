@@ -4,7 +4,7 @@ import * as socketIo from 'socket.io';
 import * as http from 'http';
 import * as srt from '../common/srt';
 import * as timestamp from '../common/timestamp';
-import readTextFileSync from './text_file';
+import readTextFile from './text_file';
 
 const DEFAULT_PORT = 3000;
 
@@ -197,10 +197,10 @@ class AppState {
   }
 }
 
-function run(): void {
+async function run(): Promise<void> {
   const { subtitlesPath, port } = parseArgs();
   console.log(`Reading subtitles from text file: ${subtitlesPath}`);
-  const { encoding, content: srtString } = readTextFileSync(subtitlesPath);
+  const { encoding, content: srtString } = await readTextFile(subtitlesPath);
   console.log(`File encoding: ${encoding}`);
   const subtitles = srt.parseSrtString(srtString);
   const app = express();
