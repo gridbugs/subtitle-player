@@ -1,5 +1,7 @@
 import fs from 'fs';
-import { default as languageEncoding } from 'detect-file-encoding-and-language';
+import { default as languageEncodingBrokenType, FileInfo } from 'detect-file-encoding-and-language';
+
+const languageEncoding: (path: string) => Promise<FileInfo> = <any>languageEncodingBrokenType;
 
 const DETECTED_TO_NODE_ENCODINGS: Record<string, BufferEncoding> = {
   'UTF-16LE': 'utf16le',
