@@ -199,9 +199,7 @@ class AppState {
 
 async function run(): Promise<void> {
   const { subtitlesPath, port } = parseArgs();
-  console.log(`Reading subtitles from text file: ${subtitlesPath}`);
-  const { encoding, content: srtString } = await readTextFile(subtitlesPath);
-  console.log(`File encoding: ${encoding}`);
+  const srtString = await readTextFile(subtitlesPath);
   const subtitles = srt.parseSrtString(srtString);
   const app = express();
   const server = http.createServer(app);
