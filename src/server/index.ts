@@ -52,6 +52,7 @@ function getWatchHandler(subtitles: srt.Subtitle[]): Handler {
         left: 0;
         right: 0;
         background-color: #000;
+        color: #FFF;
       }
       #video {
         position: fixed;
