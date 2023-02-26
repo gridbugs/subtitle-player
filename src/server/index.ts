@@ -57,6 +57,7 @@ function getWatchHandler(subtitles: srt.Subtitle[]): Handler {
       #video {
         position: fixed;
         bottom: 0;
+        z-index: -1;
       }
     </style>
   </head>
@@ -105,6 +106,7 @@ function getControlHandler(subtitles: srt.Subtitle[]): Handler {
         background-color: rgb(127, 187, 187);
         padding-left: 0.5em;
         padding-right: 0.5em;
+        border: 1px solid black;
       }
       #subtitles-seek div.time-marker {
         position: absolute;
