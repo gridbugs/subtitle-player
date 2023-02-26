@@ -193,6 +193,14 @@ class AppState {
     this.playing = true;
   }
 
+  toggle(): void {
+    if (this.isPlaying()) {
+      this.pause();
+    } else {
+      this.play();
+    }
+  }
+
   seekMs(timeMs: number): void {
     this.currentTimeMs = timeMs;
   }
@@ -219,6 +227,10 @@ async function run(): Promise<void> {
     socket.on('Pause', () => {
       console.log('pause');
       state.pause();
+    });
+    socket.on('Toggle', () => {
+      console.log('toggle');
+      state.toggle();
     });
     socket.on('Seek', (timeMs) => {
       console.log('seek', timestamp.prettyPrint(timestamp.fromMillis(timeMs)));

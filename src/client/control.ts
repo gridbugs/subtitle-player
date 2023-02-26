@@ -104,6 +104,12 @@ function run() {
   page.getElement('-0.1s').onclick = () => {
     io.emit('Seek', currentTimeMs - 100);
   };
+  document.addEventListener('keydown', (event) => {
+    if (event.code === 'Space') {
+      event.preventDefault();
+      io.emit('Toggle');
+    }
+  });
 }
 
 run();
