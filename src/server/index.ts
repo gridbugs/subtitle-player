@@ -90,7 +90,7 @@ function getControlHandler(subtitles: srt.Subtitle[]): Handler {
       }
       #subtitles-display {
         position: absolute;
-        top: 5em;
+        top: 8em;
         height: 4em;
       }
       #subtitles-seek {
@@ -131,6 +131,10 @@ function getControlHandler(subtitles: srt.Subtitle[]): Handler {
     <input class='button' type='button' value='-0.1s' id='-0.1s'/>
     <input class='button' type='button' value='+0.1s' id='+0.1s'/>
     <input class='button' type='button' value='+1s' id='+1s'/>
+    <br/>
+    <input class='button' type='button' value='faster' id='faster'/>
+    <input class='button' type='button' value='slower' id='slower'/>
+    <div id='speed-scale-display'></div>
     <div id='subtitles-display'></div>
     <div id='subtitles-seek'></div>
     <script src='/control.js'></script>
@@ -158,11 +162,17 @@ class AppState {
   private currentTimeMs: number;
   private playing: boolean;
   private previousTickTimeMs: number | null;
+  private speedScale: number;
 
   constructor() {
     this.currentTimeMs = 0;
     this.playing = false;
     this.previousTickTimeMs = null;
+    this.speedScale = 1;
+  }
+
+  setSpeedScale(speedScale: number): void {
+    this.speedScale = speedScale;
   }
 
   tick(currentTickTimeMs: number) {
@@ -173,7 +183,7 @@ class AppState {
       } else {
         deltaMs = currentTickTimeMs - this.previousTickTimeMs;
       }
-      this.currentTimeMs += deltaMs;
+      this.currentTimeMs += deltaMs * this.speedScale;
       this.previousTickTimeMs = currentTickTimeMs;
     }
   }
@@ -237,6 +247,10 @@ async function run(): Promise<void> {
     socket.on('Seek', (timeMs) => {
       console.log('seek', timestamp.prettyPrint(timestamp.fromMillis(timeMs)));
       state.seekMs(timeMs);
+    });
+    socket.on('SetSpeedScale', (speedScale) => {
+      console.log('set speed scale: ', speedScale);
+      state.setSpeedScale(speedScale);
     });
   });
   server.listen(port, () => console.log(`server running on port ${port}`));

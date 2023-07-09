@@ -75,6 +75,13 @@ function run() {
       }
     }
   });
+  let speedScale = 1;
+  function updateSpeedScaleDisplay() {
+    const e = page.getElement('speed-scale-display');
+    e.innerHTML = speedScale.toString();
+  }
+  updateSpeedScaleDisplay();
+  const speedScaleStep = 0.01;
   let currentTimeMs = 0;
   const io = socketIoClient.io();
   io.on('SetTime', (timeMs) => {
@@ -103,6 +110,16 @@ function run() {
   };
   page.getElement('-0.1s').onclick = () => {
     io.emit('Seek', currentTimeMs - 100);
+  };
+  page.getElement('faster').onclick = () => {
+    speedScale += speedScaleStep;
+    io.emit('SetSpeedScale', speedScale);
+    updateSpeedScaleDisplay();
+  };
+  page.getElement('slower').onclick = () => {
+    speedScale -= speedScaleStep;
+    io.emit('SetSpeedScale', speedScale); 
+    updateSpeedScaleDisplay();
   };
   document.addEventListener('keydown', (event) => {
     if (event.code === 'Space') {
