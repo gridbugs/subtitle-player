@@ -14,7 +14,6 @@ function subtitleTextToShowAtTime(subtitles: srt.Subtitle[], ts: timestamp.Times
   }
 }
 
-
 const MS_TO_PX_MULT = 0.05;
 const MARKER_PERIOD_MS = timestamp.fromParts({ hours: 0, minutes: 0, seconds: 10, millis: 0 }).totalMillis;
 
@@ -78,10 +77,12 @@ function run() {
   let speedScale = 1;
   function updateSpeedScaleDisplay() {
     const e = page.getElement('speed-scale-display');
-    e.innerHTML = speedScale.toString();
+    e.innerHTML = `Speed: ${speedScale}x`;
   }
   updateSpeedScaleDisplay();
-  const speedScaleStep = 0.01;
+  const speedScaleStep = 0.001;
+  (page.getElement('faster') as HTMLButtonElement).value = `Speed +${speedScaleStep}x`;
+  (page.getElement('slower') as HTMLButtonElement).value = `Speed -${speedScaleStep}x`;
   let currentTimeMs = 0;
   const io = socketIoClient.io();
   io.on('SetTime', (timeMs) => {
@@ -118,7 +119,7 @@ function run() {
   };
   page.getElement('slower').onclick = () => {
     speedScale -= speedScaleStep;
-    io.emit('SetSpeedScale', speedScale); 
+    io.emit('SetSpeedScale', speedScale);
     updateSpeedScaleDisplay();
   };
   document.addEventListener('keydown', (event) => {

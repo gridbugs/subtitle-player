@@ -127,13 +127,13 @@ function getControlHandler(subtitles: srt.Subtitle[]): Handler {
     <input class='button' type='button' value='Pause' id='pause'/>
     <input class='button' type='button' value='Cursor' id='scroll-to-cursor'/>
     <br/>
-    <input class='button' type='button' value='-1s' id='-1s'/>
-    <input class='button' type='button' value='-0.1s' id='-0.1s'/>
-    <input class='button' type='button' value='+0.1s' id='+0.1s'/>
-    <input class='button' type='button' value='+1s' id='+1s'/>
+    <input class='button' type='button' value='Seek -1s' id='-1s'/>
+    <input class='button' type='button' value='Seek -0.1s' id='-0.1s'/>
+    <input class='button' type='button' value='Seek +0.1s' id='+0.1s'/>
+    <input class='button' type='button' value='Seek +1s' id='+1s'/>
     <br/>
-    <input class='button' type='button' value='faster' id='faster'/>
-    <input class='button' type='button' value='slower' id='slower'/>
+    <input class='button' type='button' value='Speed +?x' id='faster'/>
+    <input class='button' type='button' value='Speed -?x' id='slower'/>
     <div id='speed-scale-display'></div>
     <div id='subtitles-display'></div>
     <div id='subtitles-seek'></div>
@@ -231,7 +231,7 @@ async function run(): Promise<void> {
   app.route('/control').get(getControlHandler(subtitles));
   app.use(express.static('dist'));
   io.on('connection', (socket) => {
-    console.log('a user connected');
+    console.log('a client connected');
     socket.on('Play', () => {
       console.log('play');
       state.play();
