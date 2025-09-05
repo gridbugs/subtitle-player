@@ -1,5 +1,11 @@
 # Subtitle Player
 
+## Setup
+
+```
+npm install
+```
+
 ## Running
 
 ```
