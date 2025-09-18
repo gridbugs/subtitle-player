@@ -54,11 +54,28 @@ function setCursorPosition(time: timestamp.Timestamp): void {
   page.getElement('cursor').style.top = `${topPx}px`;
 }
 
+type Sync = {
+  seekPositionMs: number;
+  realTime: Date;
+}
+
+function getSyncStats(sync1: Sync, sync2: Sync) {
+  const deltaSeekMs = sync2.seekPositionMs - sync1.seekPositionMs;
+  const deltaRealMs = sync2.realTime.getTime() - sync1.realTime.getTime();
+  const speed = deltaSeekMs / deltaRealMs;
+  return { deltaSeekMs, deltaRealMs, speed };
+}
+
 function run() {
   const displayElement = page.getSubtitlesDisplayElement();
   const subtitles = page.getSubtitles();
   const subtitlesHtml = subtitles.map(subtitleToHtml).join('\n');
   const timeMarkersHtml = mkTimeMarkersHtml(subtitles[subtitles.length - 1].period.end);
+  let sync1: Sync = {
+    seekPositionMs: 0,
+    realTime: new Date(),
+  };
+  let sync2: Sync | null = null;
   page.getElement('subtitles-seek').innerHTML = subtitlesHtml + timeMarkersHtml + mkCursor();
   document.querySelectorAll('.time-marker').forEach((element) => {
     if (element instanceof HTMLElement) {
@@ -77,9 +94,28 @@ function run() {
   let speedScale = 1;
   function updateSpeedScaleDisplay() {
     const e = page.getElement('speed-scale-display');
-    e.innerHTML = `Speed: ${speedScale}x`;
+    e.innerHTML = `Speed: ${speedScale.toFixed(3)}x`;
+  }
+  function updateSyncInfoDisplay() {
+    const e = page.getElement('sync-info');
+    const seek1 = timestamp.prettyPrint(timestamp.fromMillis(sync1.seekPositionMs));
+    const real1 = sync1.realTime.toISOString();
+    const line1 = `Sync 1: ${seek1} @ ${real1}`;
+    let line2 = "";
+    let line3 = "";
+    let line4 = "";
+    if (sync2 !== null) {
+      const seek2 = timestamp.prettyPrint(timestamp.fromMillis(sync2.seekPositionMs));
+      const real2 = sync2.realTime.toISOString();
+      line2 = `Sync 2: ${seek2} @ ${real2}`;
+      const { deltaSeekMs, deltaRealMs, speed } = getSyncStats(sync1, sync2);
+      line3 = `Delta: ${deltaSeekMs}ms over ${deltaRealMs}ms (real)`;
+      line4 = `Implied speed: ${speed.toFixed(3)}x`;
+    }
+    e.innerHTML = `<p">${line1}</p><p>${line2}</p><p>${line3}</p><p>${line4}</p>`;
   }
   updateSpeedScaleDisplay();
+  updateSyncInfoDisplay();
   const speedScaleStep = 0.001;
   (page.getElement('faster') as HTMLButtonElement).value = `Speed +${speedScaleStep}x`;
   (page.getElement('slower') as HTMLButtonElement).value = `Speed -${speedScaleStep}x`;
@@ -121,6 +157,34 @@ function run() {
     speedScale -= speedScaleStep;
     io.emit('SetSpeedScale', speedScale);
     updateSpeedScaleDisplay();
+  };
+  page.getElement('speed-reset').onclick = () => {
+    speedScale = 1;
+    io.emit('SetSpeedScale', speedScale);
+    updateSpeedScaleDisplay();
+  };
+  page.getElement('sync1').onclick = () => {
+    sync1 = {
+      seekPositionMs: currentTimeMs,
+      realTime: new Date(),
+    };
+    sync2 = null;
+    updateSyncInfoDisplay();
+  };
+  page.getElement('sync2').onclick = () => {
+    console.log(currentTimeMs);
+    const sync2Candidate = {
+      seekPositionMs: currentTimeMs,
+      realTime: new Date(),
+    };
+    if (sync2Candidate.seekPositionMs > sync1.seekPositionMs) {
+      sync2 = sync2Candidate;
+      updateSyncInfoDisplay();
+      const { speed } = getSyncStats(sync1, sync2);
+      speedScale = speed;
+      io.emit('SetSpeedScale', speedScale);
+      updateSpeedScaleDisplay();
+    }
   };
   document.addEventListener('keydown', (event) => {
     if (event.code === 'Space') {

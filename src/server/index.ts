@@ -83,19 +83,27 @@ function getControlHandler(subtitles: srt.Subtitle[]): Handler {
         padding: 0;
         margin: 0;
         font-size: 24pt;
+        font-family: monospace;
       }
       .button {
         width: 20%;
         height: 2em;
       }
+      #sync-info {
+        white-space: nowrap;
+        overflow: hidden;
+      }
+      #speed-scale-display {
+        display: inline;
+      }
       #subtitles-display {
         position: absolute;
-        top: 8em;
+        top: 14em;
         height: 4em;
       }
       #subtitles-seek {
         position: fixed;
-        top: 10em;
+        top: 18em;
         bottom: 0;
         left: 0;
         right: 0;
@@ -134,7 +142,13 @@ function getControlHandler(subtitles: srt.Subtitle[]): Handler {
     <br/>
     <input class='button' type='button' value='Speed +?x' id='faster'/>
     <input class='button' type='button' value='Speed -?x' id='slower'/>
+    <input class='button' type='button' value='Speed 1x' id='speed-reset'/>
     <div id='speed-scale-display'></div>
+    <br/>
+    <input class='button' type='button' value='Sync 1' id='sync1'/>
+    <input class='button' type='button' value='Sync 2' id='sync2'/>
+    <div id='sync-info'></div>
+    <br/>
     <div id='subtitles-display'></div>
     <div id='subtitles-seek'></div>
     <script src='/control.js'></script>

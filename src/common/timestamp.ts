@@ -17,7 +17,7 @@ const MILLIS_PER_HOUR = MILLIS_PER_MINUTE * MINUTES_PER_HOUR;
 
 export function toParts(timestamp: Timestamp): TimestampParts {
   const { totalMillis } = timestamp;
-  const millis = totalMillis % MILLIS_PER_SECOND;
+  const millis = Math.floor(totalMillis) % MILLIS_PER_SECOND;
   const seconds = Math.floor(totalMillis / MILLIS_PER_SECOND) % SECONDS_PER_MINUTE;
   const minutes = Math.floor(totalMillis / MILLIS_PER_MINUTE) % MINUTES_PER_HOUR;
   const hours = Math.floor(totalMillis / MILLIS_PER_HOUR);
